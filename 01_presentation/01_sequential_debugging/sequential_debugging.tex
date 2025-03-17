@@ -33,6 +33,9 @@
 \usepackage{dirtytalk}
 \usepackage{minted,hyperref}
 
+\hypersetup{
+	colorlinks   = true,
+}
 
 \usepackage[style=authortitle,]{biblatex} %Imports biblatex package
 \addbibresource{bibliography.bib} %Import the bibliography file
@@ -94,27 +97,84 @@
 		\end{centeredblock}
 	\end{frame}
 	
-	\begin{frame}[fragile]{Compiler Flags}
-		\begin{centeredblock}{}
-			\href{https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#gcc--clang}{Recommended Flags by Jason Turner}
+	\begin{frame}[fragile]{Helpful compilation flags: g++ compiler}
+		\begin{centeredblock}[0.85 \textwidth]{Warning flags}
+			\begin{itemize}
+				\item \texttt{-Wall}: Enables many warning flags
+				\item \texttt{-Werror}: Converts any warning into an error
+				\item \texttt{-Wextra}/\texttt{-W}: Additional warnings not in \texttt{-Wall}
+				\item \texttt{-pedantic}/\texttt{-Wpedantic}: ISO standard compliance warnings
+				\item Specific warnings:
+				\begin{itemize}
+					\item \texttt{-Wconversion}, \texttt{-Wcast-align}, \texttt{-Wunused}, \texttt{-Wshadow}, \texttt{-Wold-style-cast}
+					\item \texttt{-Wpointer-arith}, \texttt{-Wcast-qual}, \texttt{-Wmissing-prototypes}, \texttt{-Wno-missing-braces}
+				\end{itemize}
+				
+				\item the more the better, but only if you resolve them -  \href{https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#gcc--clang}{Recommended Flags}
+				\item use at least: \texttt{-Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic}
+			\end{itemize}
+		\end{centeredblock}
+		
+		{\def\thefootnote{}\footnotetext{\href{https://caiorss.github.io/C-Cpp-Notes/compiler-flags-options.html}{CPP/C++ Compiler Flags and Options}}}
+	\end{frame}
+ 
+	\begin{frame}[fragile]{Trivial example: \texttt{-Wall}}
+		\begin{centeredblock}[0.85 \textwidth]{}
+			\inputminted{cpp}{../../02_programs/01_simplistic_introduction/wall_example.cpp}
+		\end{centeredblock}
+		
+		\begin{centeredblock}[0.85 \textwidth]{}
+			\begin{minted}{shell-session}
+$ g++ wall_example.cpp
+$ g++ -Wall -Werror wall_example.cpp
+wall_example.cpp: In function 'int main()':
+wall_example.cpp:5:55: error: 'x' is used uninitialized
+5 |     std::cout << "Uninitialized value of x: " << x << "\n";
+  |                                                       ^~~~
+cc1plus: all warnings being treated as errors
+			\end{minted}
+		\end{centeredblock}
+	
+	\end{frame}
+
+	
+	\begin{frame}[fragile]{Debugger Frontends}
+		\begin{centeredblock}[0.85 \textwidth]{}
+			\begin{itemize}
+				\item lightweight terminal based \href{https://cgdb.github.io/}{cgdb}
+				\item old school \href{https://www.gnu.org/software/ddd/}{DDD}
+				\item python based - browser-based \href{https://www.gdbgui.com/}{gdbgui}
+				\item modern interpretation \href{https://github.com/epasveer/seer}{seer}
+			\end{itemize}
+			\begin{itemize}
+				\item common wisdom: learn one, then others are easier to learn
+			\end{itemize}
+			\begin{columns}
+				\column{0.5\textwidth}
+				\centering
+				\includegraphics[width=0.7\linewidth]{images/cgdb.png}
+				
+				\column{0.5\textwidth}
+				\centering
+				\includegraphics[width=0.7\linewidth]{images/DDD.png}
+			\end{columns}
 		\end{centeredblock}
 	\end{frame}
 	
-	\begin{frame}[fragile]{GNU command line debugger: gdb}
+	\begin{frame}[fragile]{All hail the king: GNU command line debugger: gdb}
 		\begin{columns}
-			\begin{column}{0.375\textwidth}
+			\begin{column}{0.3\textwidth}
 				\begin{block}{}
-					\inputminted[firstline=0,lastline=14]{cpp}{code/gdb_example_sum_hackingcpp.cpp}
+					\inputminted[firstline=1,lastline=12]{cpp}{../../02_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
 				\end{block}
 			\end{column}
 			\hfill
-			\begin{column}{0.62\textwidth}
+			\begin{column}{0.65\textwidth}
 				\begin{block}{}
-					\inputminted[firstline=15,lastline=24]{cpp}{code/gdb_example_sum_hackingcpp.cpp}
+					\inputminted[firstline=14,lastline=23]{cpp}{../../02_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
 				\end{block}
 			\end{column}
 		\end{columns}
-
 		\begin{centeredblock}[0.75 \textwidth]{}
 			Live session inspired by \href{https://hackingcpp.com/cpp/tools/gdb_intro.html}{hackingcpp: Debugging With gdb}
 		\end{centeredblock}
@@ -150,32 +210,23 @@
 		\end{block}
 	\end{frame}
 	
-	\begin{frame}[fragile]{Helpful compilation flags: g++ compiler}
-		\begin{centeredblock}[0.85 \textwidth]{Warning flags}
-			\begin{itemize}
-				\item \texttt{-Wall}: Enables many warning flags
-				\item \texttt{-Werror}: Converts any warning into an error
-				\item \texttt{-Wextra}/\texttt{-W}: Additional warnings not in \texttt{-Wall}
-				\item \texttt{-pedantic}/\texttt{-Wpedantic}: ISO standard compliance warnings
-				\item Specific warnings:
-				\begin{itemize}
-					\item \texttt{-Wconversion}, \texttt{-Wcast-align}, \texttt{-Wunused}, \texttt{-Wshadow}, \texttt{-Wold-style-cast}
-					\item \texttt{-Wpointer-arith}, \texttt{-Wcast-qual}, \texttt{-Wmissing-prototypes}, \texttt{-Wno-missing-braces}
-				\end{itemize}
-			\end{itemize}
-		\end{centeredblock}
-	
-		{\def\thefootnote{}\footnotetext{\href{https://caiorss.github.io/C-Cpp-Notes/compiler-flags-options.html}{CPP/C++ Compiler Flags and Options}}}
-	\end{frame}
-	
 	\begin{frame}[fragile]{Valgrind's tool suite}
-		\begin{centeredblock}{}
+		\begin{centeredblock}[0.85 \textwidth]{}
 			\begin{itemize}
 				\item Memcheck: detects memory-management problems: \newline 
 					\texttt{valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose <myexecutable>}
-				\item Helgrind: thread debugger \newline
-					\texttt{valgrind --tool=helgrind <myexecutable>}
-				\item Callgrind: cache profiler plus extra information about callgraphs
+					\item example usage
+\begin{minted}{shell-session}
+$ g++ -g Wall -Werror out_of_bounds.cpp -o out_of_bounds.out
+$ valgrind ./out_of_bounds.out
+==182905== Memcheck, a memory error detector
+==182905== Copyright (C) 2002-2022, and GNU GPL'd, by Seward et al.
+==182905== Using Valgrind-3.21.0 and LibVEX;
+==182905== Command: ./a.out
+==182905== 
+==182905== Invalid read of size 8
+...
+\end{minted}
 			\end{itemize}
 		\end{centeredblock}
 	\end{frame}
@@ -183,14 +234,32 @@
 	\begin{frame}[fragile]{Sanitizers}
 		\begin{centeredblock}{Sanitizers}
 			\begin{itemize}
-				\item AddressSanitizer: \texttt{-fsanitize=address}
-				\item UndefinedBehaviorSanitizer: \texttt{-fsanitize=undefined}
-				\item ThreadSanitizer: \texttt{-fsanitize=thread}
+				\item AddressSanitizer - memory error detector: \texttt{-fsanitize=address} 
+				\item UndefinedBehaviorSanitizer - undefined behavior detector: \texttt{-fsanitize=undefined}
+				\item ThreadSanitizer - data race detector: \texttt{-fsanitize=thread}
 			\end{itemize}
 		\end{centeredblock}
 	
-		{\def\thefootnote{}\footnotetext{\href{https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html}{GCC compiler flags, search for fsanitize}}}
+		{\def\thefootnote{}\footnotetext{\href{https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003daddress}{GCC compiler flags for fsanitize}}}
+	\end{frame}
 	
+	\begin{frame}[fragile]{Example: Sanitizers}
+		\begin{centeredblock}[0.95 \textwidth]{}
+			\begin{minted}{shell-session}
+$ g++ -g -fsanitize=address segfault.cpp -o a_segfault.out
+$ ./a_segfault.out
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==188435==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000
+...
+
+==188435==ABORTING
+			\end{minted}
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{Honorable Mentions: Static analyzers / Linters}
+		
 		\begin{centeredblock}{Honorable Mentions: Static analyzers / Linters}
 			\begin{itemize}
 				\item cppcheck
@@ -209,122 +278,21 @@
 				\item Solution: \texttt{rr}\footnote{\href{rr}{https://rr-project.org/}}: record a failure once, then debug the recording, deterministically, as many times as you want
 			\end{itemize}
 		\end{centeredblock}
-	
-		
-	\end{frame}
-	
-	\begin{frame}[fragile]{Parallel debugging}
-		\begin{centeredblock}{}
-			\say{Sequential programming is really hard, and parallel programming is a step beyond that.} - Andrew S. Tanenbaum, professor at Vrije Universiteit Amsterdam
-		\end{centeredblock}
-		
-		\begin{centeredblock}{}
-			\say{Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.} - Brian Kernighan, professor at Princeton University.
-		\end{centeredblock}
-	\end{frame}
-	
-	\begin{frame}[fragile]{Techniques in general}
-		\begin{centeredblock}{}
-			\say{Most bugs also appear in the sequential version of the code} - me 
-		\end{centeredblock}
-	
-		\pause
-		\begin{centeredblock}{Distinguish Problem}
-			\begin{columns}
-				\hfill
-				\begin{column}{0.15 \textwidth}
-					\begin{block}{}
-						Sequential Problem
-					\end{block}
-				\end{column}
-				\hfill
-				$\xLeftarrow[\text{persists}]{\text{problem}}$ 
-				\hfill
-				\begin{column}{0.3 \textwidth}
-					\begin{block}{}
-						Force Sequential Execution via \texttt{MPI\_Barrier()}
-					\end{block}
-				\end{column}
-				\hfill
-				$\xRightarrow[\text{now}]{\text{works}}$
-				\hfill
-				\begin{column}{0.15 \textwidth}
-					\begin{block}{}
-						Parallel Problem
-					\end{block}
-				\end{column}
-				\hfill
-			\end{columns}
-		\end{centeredblock}
-		\pause
-		\begin{centeredblock}[0.95 \textwidth]{The experts opinion: Anthony Williams - author/ coauthorof the thread library in \Cpp}
-			\begin{enumerate}
-				\item Reviewing code to locate potential bugs
-				\item Locating concurrency-related bugs by testing / Designing for testability
-			\end{enumerate}
-		\end{centeredblock}
 	\end{frame}
 
-	\begin{frame}[fragile]{Questions to think about when reviewing multithreaded code}
-		\begin{centeredblock}{}
-			\begin{itemize}
-				\item Which data needs to be protected from concurrent access?
-				\item How do you ensure that the data is protected?
-				\item Where in the code could other threads be at this time?
-				\item Which mutexes does this thread hold?
-				\item Which mutexes might other threads hold?
-				\item Are there any ordering requirements between the operations done in this
-				thread and those done in another? How are those requirements enforced?
-				\item Is the data loaded by this thread still valid? Could it have been modified by
-				other threads?
-				\item If you assume that another thread could be modifying the data, what would that
-				mean and how could you ensure that this never happens?
-			\end{itemize}
-		\end{centeredblock}
-	\end{frame}
+\begin{frame}[fragile]{Now what?}
+	\begin{block}{Use the tools / test them on simple and more complex examples}
+		In the corresponding \href{https://github.com/joscao/cpp-debugging}{github project} work through the folder \texttt{02\_sequential\_programs} content. The available tools on the PC-Pool workstations are gdb / sanitizer / valgrind.
 	
-	\begin{frame}[fragile]{MPI debugging}
-		\begin{centeredblock}{Debug Deadlocks: Attach to the process [Live-session]}
-			Situation: you have a deadlock, i.e. your executable is stuck
-			\begin{enumerate}
-				\item Compile with debug flags: \texttt{mpic++ -g -Wall <file> -o <name>}
-					\item Wait until stuck
-					\item Figure out process id's via \texttt{top} or \texttt{ps -a | grep <name>}
-					\item Attach to the process and see where you are stuck --> figure out what the problem is
-			\end{enumerate}
-		\end{centeredblock}
-		\pause
-		\begin{centeredblock}{Attaching debugger to serval instances of the executable}
-			\begin{itemize}
-				\item Use mpirun to launch separate instances of serial debuggers
-				\item Drawback: many process, usually problematic
-			\end{itemize}
-			\href{https://www.open-mpi.org/faq/?category=debugging#serial-debuggers}{OpenMPI: FAQ: Debugging applications in parallel}
-		\end{centeredblock}
-	\end{frame}
+		\vspace{1cm}
 	
-	\begin{frame}[fragile]{MPI debugging: Memchecker}
-		\begin{centeredblock}{}
-			\begin{itemize}
-				\item Requires: Open MPI 1.3 or later, and Valgrind 3.2.0 or later
-				\item Otherwise: works, but with many false positives
-				\item Needs to be enable at compilation state of OpenMPI, unfortunately often is not
-				\item to enable locally, see \href{https://www.open-mpi.org/faq/?category=debugging#memchecker}{How can I use Memchecker} 
-				\item \texttt{mpirun -np 2 valgrind <executable name>}
-			\end{itemize}
-		\end{centeredblock}
-	\end{frame}
-	
-	\begin{frame}[fragile]{Exercises}
-		\begin{centeredblock}[0.9 \textwidth]{}
-			Brought you some programs, which you can check out. Find the errors.
-			\begin{enumerate}
-				\item Use pure gdb \texttt{sequential\_prefix\_sum.cpp}
-				\item Use valgrind memchecker \texttt{memcheck\_example.cpp}
-				\item Use address sanitizer \texttt{adress\_sanitizer\_problem.cpp}
-				\item Use undefined behavior sanitizer for \texttt{rounding\_coordinates.cpp}
-				\item Is it a sequential problem or parallel for \texttt{mpi\_reusing\_a\_buffer.cpp}
-			\end{enumerate}
-		\end{centeredblock}
-	\end{frame}
+		Possible tasks:
+		\begin{itemize}
+			\item How many bugs can be found using only the warning flags? Is there a special type that is difficult to be found using warning flags?
+			\item Learn to read the sanitizer / valgrind output. Attempt the trivial examples first, then try the more difficult ones.
+			\item Hints / Solutions are available for the more complicated one, use them!
+			\item Last but not least: Ask Questions, not only to me but also to each other about your understanding.
+		\end{itemize}
+	\end{block}
+\end{frame}
 \end{document}
