@@ -66,7 +66,7 @@
 }
 
 
-\title{Sequential and Parallel Debugging}
+\title{Back to the Basics: Sequential Debugging}
 \subtitle{}
 \author{Jonathan Schmalfuß}
 \institute[UBT]{Chair of Scientific Computing \\ University of Bayreuth}
@@ -120,7 +120,7 @@
  
 	\begin{frame}[fragile]{Trivial example: \texttt{-Wall}}
 		\begin{centeredblock}[0.85 \textwidth]{}
-			\inputminted{cpp}{../../02_programs/01_simplistic_introduction/wall_example.cpp}
+			\inputminted{cpp}{../../02_sequential_programs/01_simplistic_introduction/wall_example.cpp}
 		\end{centeredblock}
 		
 		\begin{centeredblock}[0.85 \textwidth]{}
@@ -134,7 +134,6 @@ wall_example.cpp:5:55: error: 'x' is used uninitialized
 cc1plus: all warnings being treated as errors
 			\end{minted}
 		\end{centeredblock}
-	
 	\end{frame}
 
 	
@@ -165,13 +164,13 @@ cc1plus: all warnings being treated as errors
 		\begin{columns}
 			\begin{column}{0.3\textwidth}
 				\begin{block}{}
-					\inputminted[firstline=1,lastline=12]{cpp}{../../02_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
+					\inputminted[firstline=1,lastline=12]{cpp}{../../02_sequential_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
 				\end{block}
 			\end{column}
 			\hfill
 			\begin{column}{0.65\textwidth}
 				\begin{block}{}
-					\inputminted[firstline=14,lastline=23]{cpp}{../../02_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
+					\inputminted[firstline=14,lastline=23]{cpp}{../../02_sequential_programs/01_simplistic_introduction/gdb_factorial_example.cpp}
 				\end{block}
 			\end{column}
 		\end{columns}
@@ -234,13 +233,11 @@ $ valgrind ./out_of_bounds.out
 	\begin{frame}[fragile]{Sanitizers}
 		\begin{centeredblock}{Sanitizers}
 			\begin{itemize}
-				\item AddressSanitizer - memory error detector: \texttt{-fsanitize=address} 
+				\item AddressSanitizer - memory error detector: \texttt{-fsanitize=address}\footnote[frame]{\href{https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003daddress}{GCC compiler flags for fsanitize}} 
 				\item UndefinedBehaviorSanitizer - undefined behavior detector: \texttt{-fsanitize=undefined}
 				\item ThreadSanitizer - data race detector: \texttt{-fsanitize=thread}
 			\end{itemize}
 		\end{centeredblock}
-	
-		{\def\thefootnote{}\footnotetext{\href{https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003daddress}{GCC compiler flags for fsanitize}}}
 	\end{frame}
 	
 	\begin{frame}[fragile]{Example: Sanitizers}
@@ -260,10 +257,11 @@ AddressSanitizer:DEADLYSIGNAL
 	
 	\begin{frame}[fragile]{Honorable Mentions: Static analyzers / Linters}
 		
-		\begin{centeredblock}{Honorable Mentions: Static analyzers / Linters}
+		\begin{centeredblock}[0.85 \textwidth]{}
 			\begin{itemize}
-				\item cppcheck
-				\item Clang-Tidy
+				\item \href{https://cppcheck.sourceforge.io/}{cppcheck} -to detect bugs and undefined behavior and dangerous coding constructs
+				\item \href{https://clang.llvm.org/extra/clang-tidy/}{Clang-Tidy} - diagnosing and fixing typical programming errors
+				\item \href{https://include-what-you-use.org/}{include-what-you-use} - confirms your includes are sufficient
 			\end{itemize}
 		\end{centeredblock}
 	\end{frame}
