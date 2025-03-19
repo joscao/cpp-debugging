@@ -160,17 +160,16 @@
 	\begin{frame}[fragile]{Parallel Debugging: How to?}
 			\begin{columns}
 				\hfill
-				\begin{column}{0.5\textwidth}
+				\begin{column}{0.3\textwidth}
 					\begin{centeredblock}{the easy way}
 						\begin{itemize}
 							\item use a debugger and or fronted made for debugging MPI code
 							\item Industry Standard: \href{https://www.linaroforge.com/}{ddt}\footnotemark, \href{https://totalview.io/}{TotalView}\footnotemark[1]
-							\item Open Source Projects / Free: \href{https://github.com/TomMelt/mdb?tab=readme-ov-file}{mdb}, oneAPI with \href{https://www.intel.com/content/www/us/en/docs/distribution-for-gdb/tutorial-debugging-dpcpp-linux/2024-1/debugging-mpi-programs.html}{mpigdb} or a shell script \href{https://github.com/Azrael3000/tmpi}{tmpi}
 						\end{itemize}
 					\end{centeredblock}
 				\end{column}
 				\hfill
-				\begin{column}{0.5\textwidth}
+				\begin{column}{0.7\textwidth}
 					\begin{centeredblock}{should-always-work way}
 						\begin{itemize}
 							\item mininmal requirements: a debugger (gdb) + a way of finding the running processes (ps/top)
@@ -182,10 +181,15 @@
 				\hfill
 			\end{columns}
 		
+		\begin{centeredblock}{Compromise? Open Source Projects / Free:}
+			command line tool with plotting ability \href{https://github.com/TomMelt/mdb?tab=readme-ov-file}{mdb}, intel oneAPI with \href{https://www.intel.com/content/www/us/en/docs/distribution-for-gdb/tutorial-debugging-dpcpp-linux/2024-1/debugging-mpi-programs.html}{mpigdb} or a shell script \href{https://github.com/Azrael3000/tmpi}{tmpi}
+		\end{centeredblock}
+
+		
 			\footnotetext{temporary free / student license available }
 	\end{frame}
 	
-	\begin{frame}[fragile]{MPI debugging}
+	\begin{frame}[fragile]{MPI debugging - should-always-work}
 		\begin{centeredblock}{Debug Deadlocks: Attach to the process [Live-session]}
 			Situation: you have a deadlock, i.e. your executable is stuck
 			\begin{enumerate}
@@ -195,7 +199,9 @@
 				\item Attach to the process and see where you are stuck --> figure out what the problem is
 			\end{enumerate}
 		\end{centeredblock}
-		\pause
+	\end{frame}
+
+	\begin{frame}[fragile]{MPI debugging - multiple instances}
 		\begin{centeredblock}{Attaching debugger to serval instances of the executable}
 			\begin{itemize}
 				\item Use mpirun to launch separate instances of serial debuggers
@@ -204,7 +210,21 @@
 			\href{https://www.open-mpi.org/faq/?category=debugging#serial-debuggers}{OpenMPI: FAQ: Debugging applications in parallel}
 		\end{centeredblock}
 	\end{frame}
-	
+
+	\begin{frame}[fragile]{MPI debugging - mgdb}
+		\begin{centeredblock}{}
+			\begin{itemize}
+				\item easy installable : \begin{minted}{sh}
+python3 -m venv .mdb
+source .mdb/bin/activate
+pip install mdb-debugger[termgraph]
+				\end{minted} 
+				\item potentially powerful
+				\item drawback: is command line only
+			\end{itemize}
+		\end{centeredblock}
+	\end{frame}
+
 	\begin{frame}[fragile]{MPI debugging: Memchecker}
 		\begin{centeredblock}[0.85 \textwidth]{}
 			\begin{itemize}
