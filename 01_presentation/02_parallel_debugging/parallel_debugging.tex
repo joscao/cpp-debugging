@@ -1,0 +1,240 @@
+\documentclass[aspectratio=1610]{beamer}
+%[aspectratio=169]
+% ------------------------------------------------------------------------
+% PRAESENTATIONSAUSWAHL
+\usecolortheme[RGB={3,138,94}]{structure} 
+\mode<presentation> {
+	%\usetheme{CambridgeUS} 
+	\usetheme{Warsaw} 
+	% oder Antibes, Bergen, Berkeley, ....
+	
+	%\setbeamercovered{transparent}
+	
+}
+\useoutertheme{infolines}
+\setbeamertemplate{headline}{}
+
+\beamertemplatenavigationsymbolsempty
+\definecolor{unigruen}{RGB}{3,138,94} 
+
+\usefonttheme{professionalfonts}  % Aenderung der Schriftart
+% (bei mathematischen Ausdruecken)
+% ------------------------------------------------------------------------
+
+
+% ------------------------------------------------------------------------
+% EINGEBUNDENE PAKETE
+\usepackage{xcolor}
+\usepackage{varwidth}
+\usepackage[utf8]{inputenc}
+\usepackage{times,relsize,xspace}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{dirtytalk}
+\usepackage{minted,hyperref}
+
+\hypersetup{
+	colorlinks   = true,
+}
+
+\usepackage[style=authortitle,]{biblatex} %Imports biblatex package
+\addbibresource{bibliography.bib} %Import the bibliography file
+% Oder was auch immer. Zu beachten ist, das Font und Encoding passen
+% muessen. Falls T1 nicht funktioniert, kann man versuchen, die Zeile
+% mit fontenc zu loeschen.
+% ------------------------------------------------------------------------
+
+\newtheorem{thm}{Theorem}[theorem]
+
+% ------------------------------------------------------------------------
+
+\newcommand{\Rplus}{\protect\hspace{-.1em}\protect\raisebox{.35ex}{\smaller{\smaller\textbf{+}}}}
+\newcommand{\Cpp}{\mbox{C\Rplus\Rplus}\xspace}
+
+% Define the centeredblock environment to accept an optional argument for width
+\newenvironment{centeredblock}[2][0.8\textwidth]
+{ % This code will be executed at the beginning of the environment
+	\begin{center}
+		\begin{varwidth}{#1} % Use the argument for width
+			\begin{block}{#2}
+				\centering
+			}
+			{ % This code will be executed at the end of the environment
+			\end{block}
+		\end{varwidth}
+	\end{center}
+}
+
+
+\title{Parallel Debugging}
+\subtitle{}
+\author{Jonathan Schmalfuß}
+\institute[UBT]{Chair of Scientific Computing \\ University of Bayreuth}
+\date{\today}
+%\tiny A talk adapt from \href{hackingcpp.com}{hackingcpp}
+
+\begin{document}
+	
+	% TITELSEITE
+	{
+		\setbeamertemplate{headline}{} % Bei der Titelseite keine Kopf- und
+		\setbeamertemplate{footline}{} % Fusszeile
+		\begin{frame}
+			\pagestyle{empty}
+			\titlepage
+			\pagestyle{empty}
+		\end{frame}
+	}
+	
+	\logo{} % remove logo from all following pages
+	% Titelseite bei der Nummerierung ignorieren
+	\addtocounter{framenumber}{-1}
+	\setminted{fontsize=\footnotesize}
+	
+	\begin{frame}[fragile]{Parallel debugging}
+		\begin{centeredblock}{}
+			\say{Sequential programming is really hard, and parallel programming is a step beyond that.} - Andrew S. Tanenbaum, professor at Vrije Universiteit Amsterdam
+		\end{centeredblock}
+		
+		\begin{centeredblock}{}
+			\say{Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.} - Brian Kernighan, professor at Princeton University.
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{Techniques in general}
+		\begin{centeredblock}{}
+			\say{Most bugs also appear in the sequential version of the code} - me 
+		\end{centeredblock}
+		
+		\pause
+		\begin{centeredblock}{Distinguish Problem}
+			\begin{columns}
+				\hfill
+				\begin{column}{0.15 \textwidth}
+					\begin{block}{}
+						Sequential Problem
+					\end{block}
+				\end{column}
+				\hfill
+				$\xLeftarrow[\text{persists}]{\text{problem}}$ 
+				\hfill
+				\begin{column}{0.3 \textwidth}
+					\begin{block}{}
+						Force Sequential Execution via \texttt{MPI\_Barrier()}
+					\end{block}
+				\end{column}
+				\hfill
+				$\xRightarrow[\text{now}]{\text{works}}$
+				\hfill
+				\begin{column}{0.15 \textwidth}
+					\begin{block}{}
+						Parallel Problem
+					\end{block}
+				\end{column}
+				\hfill
+			\end{columns}
+		\end{centeredblock}
+		\pause
+		\begin{centeredblock}[0.95 \textwidth]{The experts opinion: Anthony Williams - author/ coauthorof the thread library in \Cpp}
+			\begin{enumerate}
+				\item Reviewing code to locate potential bugs
+				\item Locating concurrency-related bugs by testing / Designing for testability
+			\end{enumerate}
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{Questions while reviewing multiprocess code}
+		\begin{centeredblock}{}
+			\begin{itemize}
+				\item Are there any ordering requirements between the operations done in this
+				process and those done in another? How are those requirements enforced?
+				\item Which data needs to be protected from concurrent access? How do you ensure that the data is protected?
+				\item Where in the code could other processes be at this time?
+				\item Is the data loaded by this process still valid? 
+				\item If you assume that another process could be modifying the data, what would that
+				mean and how could you ensure that this never happens?
+			\end{itemize}
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{Parallel Debugging: How to?}
+			\begin{columns}
+				\hfill
+				\begin{column}{0.5\textwidth}
+					\begin{centeredblock}{the easy way}
+						\begin{itemize}
+							\item use a debugger and or fronted made for debugging MPI code
+							\item Industry Standard: \href{https://www.linaroforge.com/}{ddt}\footnotemark, \href{https://totalview.io/}{TotalView}\footnotemark[1]
+							\item Open Source Projects / Free: \href{https://github.com/TomMelt/mdb?tab=readme-ov-file}{mdb}, oneAPI with \href{https://www.intel.com/content/www/us/en/docs/distribution-for-gdb/tutorial-debugging-dpcpp-linux/2024-1/debugging-mpi-programs.html}{mpigdb} or a shell script \href{https://github.com/Azrael3000/tmpi}{tmpi}
+						\end{itemize}
+					\end{centeredblock}
+				\end{column}
+				\hfill
+				\begin{column}{0.5\textwidth}
+					\begin{centeredblock}{should-always-work way}
+						\begin{itemize}
+							\item mininmal requirements: a debugger (gdb) + a way of finding the running processes (ps/top)
+							\item \texttt{mpirun} creates multiple processes --> attach to relevant processes or all --> debugg each of them sequentially
+							\item limits: low number of processes, requires duplicating input for each process
+						\end{itemize}
+					\end{centeredblock}
+				\end{column}
+				\hfill
+			\end{columns}
+		
+			\footnotetext{temporary free / student license available }
+	\end{frame}
+	
+	\begin{frame}[fragile]{MPI debugging}
+		\begin{centeredblock}{Debug Deadlocks: Attach to the process [Live-session]}
+			Situation: you have a deadlock, i.e. your executable is stuck
+			\begin{enumerate}
+				\item Compile with debug flags: \texttt{mpic++ -g -Wall <file> -o <name>}
+				\item Wait until stuck
+				\item Figure out process id's via \texttt{top} or \texttt{ps -a | grep <name>}
+				\item Attach to the process and see where you are stuck --> figure out what the problem is
+			\end{enumerate}
+		\end{centeredblock}
+		\pause
+		\begin{centeredblock}{Attaching debugger to serval instances of the executable}
+			\begin{itemize}
+				\item Use mpirun to launch separate instances of serial debuggers
+				\item Drawback: many process, usually problematic
+			\end{itemize}
+			\href{https://www.open-mpi.org/faq/?category=debugging#serial-debuggers}{OpenMPI: FAQ: Debugging applications in parallel}
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{MPI debugging: Memchecker}
+		\begin{centeredblock}[0.85 \textwidth]{}
+			\begin{itemize}
+				\item Requires: Open MPI 1.3 or later, and Valgrind 3.2.0 or later
+				\item Otherwise: works, but with many false positives
+				\item Needs to be enable at compilation state of OpenMPI, unfortunately often is not
+				\item to enable locally, see \href{https://www.open-mpi.org/faq/?category=debugging#memchecker}{How can I use Memchecker}
+				\item \begin{minted}[tabsize=2,breaklines]{sh}
+mpirun -np 2 valgrind --suppressions=$PREFIX/share/openmpi/openmpi-valgrind.supp <executable name>
+				\end{minted}
+			\end{itemize}
+		\end{centeredblock}
+	\end{frame}
+	
+	\begin{frame}[fragile]{The easy way}
+		\begin{centeredblock}{ddt [Live-session]}
+			\begin{itemize}
+				\item same deadlock problem	
+			\end{itemize}
+		\end{centeredblock}
+	\end{frame}
+	
+	
+	\begin{frame}[fragile]{Exercises}
+		\begin{centeredblock}[0.9 \textwidth]{}
+			Brought you some programs, which you can check out. Find the errors.
+			\begin{enumerate}
+
+				\item Is it a sequential problem or parallel for \texttt{mpi\_reusing\_a\_buffer.cpp}
+			\end{enumerate}
+		\end{centeredblock}
+	\end{frame}
+\end{document}
