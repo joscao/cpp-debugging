@@ -240,7 +240,8 @@
 			\begin{itemize}
 				\item Attach a terminal with gdb to each process (opens multiple windows using xterm)
 				\mintinline{sh}{mpiexec -n 2 xterm -e gdb --args a.out 10}
-				\item Attach to single process from the begining with arguments: \mintinline{sh}{mpirun -n 1 gdb --args ./a.out 10 : -N 1 ./a.out 10}
+				\item Attach to single process from the beginning with arguments: \mintinline{sh}{mpirun -n 1 gdb --args ./a.out 10 : -n 1 ./a.out 10}
+				\item Attach to single process with xterm from the beginning with arguments: \mintinline{sh}{mpirun -n 1 xterm -e gdb --args ./a.out 10 : -n 1 ./a.out 10}
 			\end{itemize}
 		\end{centeredblock}
 	\end{frame}
@@ -291,6 +292,7 @@ pip install mdb-debugger[termgraph]
 				\end{minted} 
 				\item potentially powerful
 				\item drawback: is command line only / early development stages
+				\item \href{https://mdb.readthedocs.io/en/latest/quick-start.html}{QuickStart}
 			\end{itemize}
 		\end{centeredblock}
 	\end{frame}
