@@ -72,7 +72,6 @@
 \institute[UBT]{Chair of Scientific Computing \\ University of Bayreuth}
 \date{\today}
 %\tiny A talk adapt from \href{hackingcpp.com}{hackingcpp}
-
 \begin{document}
 	
 	% TITELSEITE
@@ -201,18 +200,89 @@
 		\end{centeredblock}
 	\end{frame}
 
+	\begin{frame}[fragile]{Recap Live-Session: MPI debugging - should-always-work}
+		\begin{centeredblock}{}
+			\begin{minted}[autogobble, breaklines]{sh}
+				$ mpic++ deadlock_blocking_recieve_before_send.cpp -g -Wall
+				$ mpirun -np 2 ./a.out 10
+				0: Receiving 10 elements of type int from my left neighbor 1.
+				1: Receiving 10 elements of type int from my left neighbor 0.
+			\end{minted}
+		\end{centeredblock}
+		
+		\begin{centeredblock}{}
+			\begin{minted}[autogobble]{sh}
+				$ ps -a | grep a.out
+				553640 pts/1    00:00:15 a.out
+				$ ps -a | grep a.out
+				553980 pts/1    00:00:02 a.out
+				553981 pts/1    00:00:02 a.out
+				$ gdb -p 553980
+				GNU gdb (Ubuntu 12.1-0ubuntu1~22.04.2) 12.1
+				...
+				(gdb) where
+				#0  in opal_progress () from ...
+				#1  in mca_pml_ob1_recv () from ...
+				#2  in PMPI_Recv () from ...
+				#3  in main () at deadlock_blocking_recieve_before_send.cpp:28
+			\end{minted}
+		\end{centeredblock}
+	\end{frame}
+
 	\begin{frame}[fragile]{MPI debugging - multiple instances}
-		\begin{centeredblock}{Attaching debugger to serval instances of the executable}
+		\begin{centeredblock}{Attaching debugger to serval instances of the executable [Live-session]}
 			\begin{itemize}
 				\item Use mpirun to launch separate instances of serial debuggers
 				\item Drawback: many process, usually problematic
 			\end{itemize}
 			\href{https://www.open-mpi.org/faq/?category=debugging#serial-debuggers}{OpenMPI: FAQ: Debugging applications in parallel}
+			
+			\begin{itemize}
+				\item Attach a terminal with gdb to each process (opens multiple windows using xterm)
+				\mintinline{sh}{mpiexec -n 2 xterm -e gdb --args a.out 10}
+				\item Attach to single process from the begining with arguments: \mintinline{sh}{mpirun -n 1 gdb --args ./a.out 10 : -N 1 ./a.out 10}
+			\end{itemize}
+		\end{centeredblock}
+	\end{frame}
+
+	\begin{frame}[fragile]{Recap Live-Session: MPI debugging - multiple instances}
+		\begin{centeredblock}{}
+			\begin{minted}[autogobble, breaklines]{sh}
+				$ mpicxx -g simple-mpi.cpp
+				$ mpirun -n 2 xterm -e gdb --args a.out 10
+			\end{minted}
+			\vspace{-0.5cm}
+			\begin{columns}
+				\begin{column}{0.5 \textwidth}
+					\centering
+					\includegraphics[width=0.7\linewidth]{figures/gdb-xterm-window-0}
+				\end{column}
+				\begin{column}{0.5 \textwidth}
+					\centering					
+					\includegraphics[width=0.7\linewidth]{figures/gdb-xterm-window-1}
+				\end{column}
+			\end{columns}
+			\vspace{-0.5cm}
+		\end{centeredblock}
+		
+		\begin{centeredblock}{}
+			\begin{minted}[autogobble]{sh}
+				$ mpicxx -g simple-mpi.cpp
+				$ mpirun -n 1 gdb --args ./a.out 10 : -N 1 ./a.out 10
+				GNU gdb
+				(gdb) b 28
+				Starting program: /data/01_simplistic_introduction/a.out 10
+				[New Thread 0x7ffff76126c0 (LWP 572127)]
+				[New Thread 0x7ffff5d5f6c0 (LWP 572128)]
+				
+				Thread 1 "a.out" hit Breakpoint 1, main () at simple-mpi.cpp:28
+				28        var = 10.*process_rank;
+			\end{minted}
 		\end{centeredblock}
 	\end{frame}
 
 	\begin{frame}[fragile]{MPI debugging - mgdb}
-		\begin{centeredblock}{}
+		\begin{centeredblock}{mgdb [Live-session]}
 			\begin{itemize}
 				\item easy installable : \begin{minted}{sh}
 python3 -m venv .mdb
@@ -220,10 +290,55 @@ source .mdb/bin/activate
 pip install mdb-debugger[termgraph]
 				\end{minted} 
 				\item potentially powerful
-				\item drawback: is command line only
+				\item drawback: is command line only / early development stages
 			\end{itemize}
 		\end{centeredblock}
 	\end{frame}
+
+\begin{frame}[fragile]{Recap Live-Session: MPI debugging - mgdb}
+	\begin{centeredblock}{}
+		\begin{minted}[autogobble]{sh}
+			$ python3 -m venv .mdb
+			$ source .mdb/bin/activate
+			$ pip install mdb-debugger[termgraph]
+			...
+			$ mpicxx -g simple-mpi.cpp 
+			$ mdb launch -b gdb -n 2 -t ./a.out --log-level=DEBUG
+			running on host: 132.180.176.41
+			to connect to the debugger run:
+			mdb attach -h 132.180.176.41 -p 2000
+			...
+		\end{minted}
+	\end{centeredblock}
+	\begin{centeredblock}[0.95 \textwidth]{}
+		\begin{minted}[autogobble]{sh}
+			$ source .mdb/bin/activate
+			$ mdb attach -h 132.180.176.41 -p 2000
+			(mdb 0-1) command 0 b 38
+			0:      Breakpoint 2: file simple-mpi.cpp, line 39.
+			(mdb 0-1) broadcast start
+			(bcm 0-1) c
+			^C0:    Continuing.
+			0:      process 0 sleeping for 3s...
+			0:      Thread 1 "a.out" hit Breakpoint 2, main () at simple-mpi.cpp:39
+			0:      39        MPI_Barrier(MPI_COMM_WORLD);
+			************************************************************************
+			1:      Continuing.
+			1:      ^C
+			1:      Thread 1 "a.out" received signal SIGINT, Interrupt.
+			1:      0x00007ffff7e68fa0 in opal_progress@plt () from /lib/x86_64-linux-gnu/libmpi.so.40
+			1:
+			1:      Interrupted: True
+			
+			(bcm 0-1) where
+			0:      #0  main () at simple-mpi.cpp:39
+			************************************************************************
+			1:      #0  0x00007ffff7e68fa0 in opal_progress@plt () from 
+			1:      #3   in PMPI_Barrier () from /lib/x86_64-linux-gnu/libmpi.so.40
+			1:      #4   in main () at simple-mpi.cpp:39
+		\end{minted}
+	\end{centeredblock}
+\end{frame}
 
 	\begin{frame}[fragile]{MPI debugging: Memchecker}
 		\begin{centeredblock}[0.85 \textwidth]{}
@@ -240,21 +355,27 @@ mpirun -np 2 valgrind --suppressions=$PREFIX/share/openmpi/openmpi-valgrind.supp
 	\end{frame}
 	
 	\begin{frame}[fragile]{The easy way}
-		\begin{centeredblock}{ddt [Live-session]}
-			\begin{itemize}
-				\item same deadlock problem	
-			\end{itemize}
+		\begin{centeredblock}{}
+			\centering					
+			\includegraphics[width=0.9\linewidth]{figures/ddt}
+			
+			
+			\href{https://youtu.be/Q8HwLg22BpY?t=1006}{ddt tutorial}
 		\end{centeredblock}
 	\end{frame}
 	
-	
-	\begin{frame}[fragile]{Exercises}
-		\begin{centeredblock}[0.9 \textwidth]{}
-			Brought you some programs, which you can check out. Find the errors.
-			\begin{enumerate}
-
-				\item Is it a sequential problem or parallel for \texttt{mpi\_reusing\_a\_buffer.cpp}
-			\end{enumerate}
-		\end{centeredblock}
+	\begin{frame}[fragile]{Now what?}
+		\begin{block}{Use the tools / test them on simple and more complex examples}
+			In the corresponding \href{https://github.com/joscao/cpp-debugging}{github project} work through the folder \texttt{03\_parallel\_programs} content. The available tools on the PC-Pool workstations are gdb / xterm.
+			
+			\vspace{1cm}
+			
+			Possible tasks:
+			\begin{itemize}
+				\item Attach gdb in different ways to the same executable!
+				\item Is it a sequential or parallel problem?
+				\item Last but not least: Ask Questions, not only to me but also to each other about your understanding.
+			\end{itemize}
+		\end{block}
 	\end{frame}
 \end{document}
